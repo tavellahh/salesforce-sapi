@@ -1,0 +1,44 @@
+#%RAML 1.0
+title: SalesforceSystemAPI
+
+/ESR:
+  patch:
+    description: Update ESR resource fields.
+    body:
+      application/json:
+        type: object
+        properties:
+          projectTitle:
+            type: string
+            required: true
+            description: The title of the project.
+          projectStatus:
+            type: string
+            required: true
+            description: The status of the project.
+          progress:
+            type: string
+            required: true
+            description: The progress of the project.
+          projectEngineer:
+            type: string
+            required: true
+            description: The engineer responsible for the project.
+          designLead:
+            type: string
+            required: true
+            description: The lead designer for the project.
+          swProjectID:
+            type: string
+            required: true
+            description: SolidWorks Project ID.
+
+    responses:
+      200:
+        description: Successfully updated the ESR fields.
+      400:
+        description: Bad request, validation error, or missing required fields.
+      404:
+        description: ESR resource not found.
+      500:
+        description: Internal server error.

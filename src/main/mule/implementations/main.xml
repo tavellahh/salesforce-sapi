@@ -10,10 +10,10 @@ http://www.mulesoft.org/schema/mule/salesforce-pub-sub http://www.mulesoft.org/s
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="abfbd177-f231-4f1b-9b09-247727209fdb" >
 		<http:listener-connection host="0.0.0.0" port="8082" />
 	</http:listener-config>
-	<!-- [STUDIO:"mainFlow"]<flow name="mainFlow" doc:id="a0422ec9-7656-4155-9352-c7d8e5b58327" >
+	<flow name="mainFlow" doc:id="a0422ec9-7656-4155-9352-c7d8e5b58327" >
 		<http:listener doc:name="Listener" doc:id="9321ce3f-73e6-482a-af47-a1a5966fd985" config-ref="HTTP_Listener_config" path="/salesforce-sapi/test"/>
 		<flow-ref doc:name="Flow Reference" doc:id="689b25c8-09c8-40a9-9abe-c185fbf3a079" name="salesforce-patch"/>
-	</flow> [STUDIO] -->
+	</flow>
 	<sub-flow name="salesforce-patch" doc:id="5d939cd6-989a-4ae6-9e4f-c8da4e9ad9d6" >
 		<logger level="INFO" doc:name="Logger" doc:id="c747efee-4af9-4e09-834a-a3ce46b4e5fb" message="#[payload]" />
 		<ee:transform doc:name="create query" doc:id="ffffbe72-45a6-41f9-9ef8-0b8548a054ce" >

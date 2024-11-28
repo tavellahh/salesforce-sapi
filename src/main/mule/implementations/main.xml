@@ -12,30 +12,76 @@ http://www.mulesoft.org/schema/mule/salesforce-pub-sub http://www.mulesoft.org/s
 	</http:listener-config>
 	<flow name="mainFlow" doc:id="a0422ec9-7656-4155-9352-c7d8e5b58327" >
 		<http:listener doc:name="Listener" doc:id="9321ce3f-73e6-482a-af47-a1a5966fd985" config-ref="HTTP_Listener_config" path="/salesforce-sapi/test"/>
-		<salesforce:query doc:name="Query" doc:id="c5b782d2-1aa2-439b-ae01-b2539c7f7843" config-ref="Salesforce_Config_RSPoles" />
-		<ee:transform doc:name="Transform Message" doc:id="a30eb612-9887-4f29-859d-85bbc07e1a6e" >
-			<ee:message >
-			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="projectEngineer" ><![CDATA[%dw 2.0
-output application/json
----
-{
-  firstName: if (payload.projectEngineer is Array and sizeOf(payload.projectEngineer) > 0) 
-               ((payload.projectEngineer[0].someField as String) splitBy ",")[0] 
-             else 
-               null,
-  lastName: if (payload.projectEngineer is Array and sizeOf(payload.projectEngineer) > 0) 
-              ((payload.projectEngineer[0].someField as String) splitBy ",")[1] 
-            else 
-              null
-}]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
+		
 		<flow-ref doc:name="Flow Reference" doc:id="689b25c8-09c8-40a9-9abe-c185fbf3a079" name="salesforce-patch"/>
 	</flow>
 	<sub-flow name="salesforce-patch" doc:id="5d939cd6-989a-4ae6-9e4f-c8da4e9ad9d6" >
-		<logger level="INFO" doc:name="Logger" doc:id="c747efee-4af9-4e09-834a-a3ce46b4e5fb" message="#[payload]" />
+		<ee:transform doc:name="originalPayload" doc:id="4aee7161-54ea-4d0a-85ef-6ed22894df59" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="originalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="namesToGetId" doc:id="f13c7f98-0668-4ba3-86d2-44602494f1f6">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="namesToGetId" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  projectEngineer: payload.projectEngineer splitBy  ",",
+  designLead: payload.designLead splitBy  ",",
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="querysToGetId" doc:id="70b86253-0940-44a7-afda-c9115bb6081b" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="querysToGetId" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  projectEngineer: 
+    "SELECT Id FROM User where FirstName = '" ++ vars.namesToGetId.projectEngineer[0] ++ "' and LastName = '" ++  vars.namesToGetId.projectEngineer[1] ++ "'",
+     designLead: 
+    "SELECT Id FROM User where FirstName = '" ++ vars.namesToGetId.designLead[0] ++ "' and LastName = '" ++  vars.namesToGetId.designLead[1] ++ "'"
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="Query projectEngineer" doc:id="41ac3626-f333-42ee-8a48-0d980e782e98" config-ref="Salesforce_Config_RSPoles" >
+			<salesforce:salesforce-query ><![CDATA[#[vars.querysToGetId.projectEngineer]]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="projectEngineerId" doc:id="bcf50104-4c51-406a-8512-07a9744dd380" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="projectEngineerId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload[0].Id
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="Query designLead" doc:id="9b2d841c-5e9a-4da3-872a-3faeabb39509" config-ref="Salesforce_Config_RSPoles">
+			<salesforce:salesforce-query><![CDATA[#[vars.querysToGetId.designLead]]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="designLeadId" doc:id="aefa1ad1-da9f-4886-bf9f-e3586b315e66">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="designLeadId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload[0].Id
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
 		<ee:transform doc:name="create query" doc:id="ffffbe72-45a6-41f9-9ef8-0b8548a054ce" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -43,13 +89,13 @@ output application/java
 ---
 [
     {
-        "Name": payload.name,
-        "Project_Title__c": if (payload.projectTitle? and payload.projectTitle != "") payload.projectTitle else null,
-        "Project_Status__c": if (payload.projectStatus? and payload.projectStatus != "") payload.projectStatus else null,
-        "Progress__c": if (payload.progress? and payload.progress != "") payload.progress else null,
-        "SolidWorks_Project_ID__c": if (payload.swProjectID? and payload.swProjectID != "") payload.swProjectID else null,
-        "Project_Engineer__c": if (payload.projectEngineer? and payload.projectEngineer != "") payload.projectEngineer else null,
-        "Design_Lead__c": if (payload.designLead? and payload.designLead != "") payload.designLead else null,
+        "Name": vars.originalPayload.name,
+        "Project_Title__c": if (vars.originalPayload.projectTitle? and vars.originalPayload.projectTitle != "") vars.originalPayload.projectTitle else null,
+        "Project_Status__c": if (vars.originalPayload.projectStatus? and vars.originalPayload.projectStatus != "") vars.originalPayload.projectStatus else null,
+        "Progress__c": if (vars.originalPayload.progress? and vars.originalPayload.progress != "") vars.originalPayload.progress else null,
+        "SolidWorks_Project_ID__c": if (vars.originalPayload.swProjectID? and vars.originalPayload.swProjectID != "") vars.originalPayload.swProjectID else null,
+        "Project_Engineer__c": if (vars.projectEngineerId? and vars.projectEngineerId != "") vars.projectEngineerId else null,
+        "Design_Lead__c": if (vars.designLeadId? and vars.designLeadId != "") vars.designLeadId else null,
         
     } 
     // Apply filterObject only on the inner object
@@ -57,7 +103,7 @@ output application/java
 			</ee:message>
 		</ee:transform>
 		<salesforce:upsert objectType="ESR__c" externalIdFieldName="Name" doc:name="Upsert" doc:id="cb6b2a43-e78f-43fb-8d12-3fdef4ba6ce8" config-ref="Salesforce_Config_RSPoles"/>
-		<ee:transform doc:name="Transform Message" doc:id="8d4db868-2357-4277-a0fb-4feb296b7ff3">
+		<ee:transform doc:name="response" doc:id="8d4db868-2357-4277-a0fb-4feb296b7ff3">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json

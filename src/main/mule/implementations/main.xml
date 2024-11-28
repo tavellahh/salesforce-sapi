@@ -27,9 +27,10 @@ output application/java
         "Project_Title__c": if (payload.projectTitle? and payload.projectTitle != "") payload.projectTitle else null,
         "Project_Status__c": if (payload.projectStatus? and payload.projectStatus != "") payload.projectStatus else null,
         "Progress__c": if (payload.progress? and payload.progress != "") payload.progress else null,
-        //"Project_Engineer__c": if (payload.projectEngineer? and payload.projectEngineer != "") payload.projectEngineer else null,
-        //"Design_Lead__c": if (payload.designLead? and payload.designLead != "") payload.designLead else null,
-        "SolidWorks_Project_ID__c": if (payload.swProjectID? and payload.swProjectID != "") payload.swProjectID else null
+        "SolidWorks_Project_ID__c": if (payload.swProjectID? and payload.swProjectID != "") payload.swProjectID else null,
+        "Project_Engineer__c": if (payload.projectEngineer? and payload.projectEngineer != "") payload.projectEngineer else null,
+        "Design_Lead__c": if (payload.designLead? and payload.designLead != "") payload.designLead else null,
+        
     } 
     // Apply filterObject only on the inner object
 ] map ((item) -> item filterObject ((value, key) -> value != null))]]></ee:set-payload>

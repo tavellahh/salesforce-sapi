@@ -15,16 +15,22 @@ http://www.mulesoft.org/schema/mule/salesforce-pub-sub http://www.mulesoft.org/s
 		<salesforce:query doc:name="Query" doc:id="c5b782d2-1aa2-439b-ae01-b2539c7f7843" config-ref="Salesforce_Config_RSPoles" />
 		<ee:transform doc:name="Transform Message" doc:id="a30eb612-9887-4f29-859d-85bbc07e1a6e" >
 			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="projectEngineer" ><![CDATA[%dw 2.0
 output application/json
-var fullName = "Hernan,Tavella"
 ---
 {
-  firstName: (fullName splitBy ",")[0],
-  lastName: (fullName splitBy ",")[1]
-}
-]]></ee:set-payload>
-			</ee:message>
+  firstName: if (payload.projectEngineer is Array and sizeOf(payload.projectEngineer) > 0) 
+               ((payload.projectEngineer[0].someField as String) splitBy ",")[0] 
+             else 
+               null,
+  lastName: if (payload.projectEngineer is Array and sizeOf(payload.projectEngineer) > 0) 
+              ((payload.projectEngineer[0].someField as String) splitBy ",")[1] 
+            else 
+              null
+}]]></ee:set-variable>
+			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="Flow Reference" doc:id="689b25c8-09c8-40a9-9abe-c185fbf3a079" name="salesforce-patch"/>
 	</flow>

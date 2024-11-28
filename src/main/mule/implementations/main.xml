@@ -12,6 +12,20 @@ http://www.mulesoft.org/schema/mule/salesforce-pub-sub http://www.mulesoft.org/s
 	</http:listener-config>
 	<flow name="mainFlow" doc:id="a0422ec9-7656-4155-9352-c7d8e5b58327" >
 		<http:listener doc:name="Listener" doc:id="9321ce3f-73e6-482a-af47-a1a5966fd985" config-ref="HTTP_Listener_config" path="/salesforce-sapi/test"/>
+		<salesforce:query doc:name="Query" doc:id="c5b782d2-1aa2-439b-ae01-b2539c7f7843" config-ref="Salesforce_Config_RSPoles" />
+		<ee:transform doc:name="Transform Message" doc:id="a30eb612-9887-4f29-859d-85bbc07e1a6e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var fullName = "Hernan,Tavella"
+---
+{
+  firstName: (fullName splitBy ",")[0],
+  lastName: (fullName splitBy ",")[1]
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<flow-ref doc:name="Flow Reference" doc:id="689b25c8-09c8-40a9-9abe-c185fbf3a079" name="salesforce-patch"/>
 	</flow>
 	<sub-flow name="salesforce-patch" doc:id="5d939cd6-989a-4ae6-9e4f-c8da4e9ad9d6" >

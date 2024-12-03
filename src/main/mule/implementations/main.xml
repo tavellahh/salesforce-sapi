@@ -93,7 +93,7 @@ output application/java
         "Project_Title__c": if (vars.originalPayload.projectTitle? and vars.originalPayload.projectTitle != "") vars.originalPayload.projectTitle else null,
         "Project_Status__c": if (vars.originalPayload.projectStatus? and vars.originalPayload.projectStatus != "") vars.originalPayload.projectStatus else null,
         "Progress__c": if (vars.originalPayload.progress? and vars.originalPayload.progress != "") vars.originalPayload.progress else null,
-        "SolidWorks_Project_ID__c": if (vars.originalPayload.swProjectID? and vars.originalPayload.swProjectID != "") vars.originalPayload.swProjectID else null,
+        "SolidWorks_Project_ID__c": if (vars.originalPayload.SolidWorks_Project_ID__c? and vars.originalPayload.SolidWorks_Project_ID__c != "") vars.originalPayload.SolidWorks_Project_ID__c else null,
         "Project_Engineer__c": if (vars.projectEngineerId? and vars.projectEngineerId != "") vars.projectEngineerId else null,
         "Design_Lead__c": if (vars.designLeadId? and vars.designLeadId != "") vars.designLeadId else null,
         
